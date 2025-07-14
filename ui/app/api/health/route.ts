@@ -5,4 +5,3 @@ export const dynamic = "force-dynamic"; // отключает ISR/кеширов
 export async function GET() {
   return NextResponse.json({ status: "ok" });
 }
-
