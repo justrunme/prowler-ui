@@ -1,0 +1,47 @@
+name: Build and Test UI Docker
+
+on:
+  push:
+    paths:
+      - 'ui/**'
+      - '.github/workflows/ui-docker-ci.yml'
+  pull_request:
+    paths:
+      - 'ui/**'
+      - '.github/workflows/ui-docker-ci.yml'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t prowler-ui-test ./ui
+
+      - name: Run Docker container
+        run: |
+          docker run -d --rm -p 3000:3000 --name prowler-ui prowler-ui-test
+
+      - name: Wait for UI to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:3000 > /dev/null; then
+              echo "UI is up!"
+              exit 0
+            fi
+            echo "Waiting for UI to be ready..."
+            sleep 2
+          done
+          echo "UI did not start in time" >&2
+          exit 1
+
+      - name: Stop Docker container
+        if: always()
+        run: docker stop prowler-ui 
