@@ -4,11 +4,11 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Копируем package.json и устанавливаем зависимости
-COPY ui/package*.json ./
+COPY package*.json ./
 RUN npm install
 
 # Копируем все файлы
-COPY ui .
+COPY . .
 
 # Собираем проект как standalone Next.js приложение
 RUN npm run build
